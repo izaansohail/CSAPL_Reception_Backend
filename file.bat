@@ -1,0 +1,1 @@
+pythonw "C:\Users\intern.it-izaan\Desktop\Reception System\CSAPL_Reception_Backend\crop-cv2.pyw"

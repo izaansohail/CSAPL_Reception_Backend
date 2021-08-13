@@ -1,13 +1,14 @@
 from re import split
 import datetime
+import ssl
 from flask import Flask, request
 from pymongo import MongoClient
 from flask_cors import CORS
 import waitress
 app = Flask(__name__)
 CORS(app)
-app.config["DEBUG"] = True
-client = MongoClient("mongodb+srv://superman:isadmin@csapl.3t7kz.mongodb.net/test")
+app.config["DEBUG"] = False
+client = MongoClient("mongodb+srv://superman:isadmin@csapl.3t7kz.mongodb.net/test", ssl_cert_reqs=ssl.CERT_NONE)
 
 @app.route('/data_handling', methods=['POST', "GET"])
 def process_image():
@@ -174,5 +175,5 @@ def login():
         elif(data['username'] == "admin" and data['password'] == "isadmin"):
             return {"token": "1234"}
         
-# app.run(host="localhost")
-waitress.serve(app, port=5000, url_scheme='http')
+#app.run(host="localhost")
+waitress.serve(app, port=5000)
