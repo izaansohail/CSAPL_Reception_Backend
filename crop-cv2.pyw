@@ -8,9 +8,9 @@ import waitress
 app = Flask(__name__)
 CORS(app)
 app.config["DEBUG"] = False
-client = MongoClient("mongodb+srv://superman:isadmin@csapl.3t7kz.mongodb.net/test", ssl_cert_reqs=ssl.CERT_NONE)
+client = MongoClient("mongodb+srv://izaan:microsoft123@csapl.hsqoz.mongodb.net/test?authSource=admin&replicaSet=atlas-run4dp-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true", ssl_cert_reqs=ssl.CERT_NONE)
 
-@app.route('/data_handling', methods=['POST', "GET"])
+@app.route('/data_handling', methods=['POST'])
 def process_image():
     db = client['Reception_Name']
     VisitorsData = db.Visitors
@@ -85,7 +85,7 @@ def checkout_screen():
             val = 0
             for entry in visitor1:
                 val += 1
-                if entry["cnic"] == cnic and val == count:
+                if entry["cnic"] == cnic:
                     entry["Check_Out_Date"] = checkout
                     visitor = VisitorsData.update_one({'_id': entry['_id']}, {'$set': entry})
             if visitor != None:        
@@ -109,62 +109,119 @@ def search_screen():
         dict1 = {}
         val =  0
         val1 = 0
+        non_check = 0
         for k, v in filter.items():  
-            if k == "Check_In_Date":
+            if k == "From":
                 todate = v
                 val = 1
-            elif k == "Check_Out_Date":
+            elif k == "To":
                 fromdate = v
                 val1 = 1
+            elif k == "Non_Checked_Out":
+                non_check = 1
             else:
                 dict1[k] = v
 
         if val == 0 and val1 == 0 :
             visitor = VisitorsData.find(dict1)
-            
-        elif val == 1 and val1 == 0:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+todate} ,**dict1})
-
-        elif val == 0 and val1 == 1:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+fromdate}, **dict1})
-            
-        elif val == 1 and val1 == 1:            
-            visitor = VisitorsData.find(dict1)
-            todate = todate.split("-")
-            day = todate[2]
-            month = todate[1]
-            year = todate[0]
-            todate = datetime.datetime(int(year), int(month), int(day))
-
-            fromdate = fromdate.split("-")
-            day = int(fromdate[2])
-            month = fromdate[1]
-            year = fromdate[0]
-            fromdate = datetime.datetime(int(year), int(month), int(day))
-
-            query = []
-            for entry in visitor:
-                date = entry['Check_In_Date']
-                date = date.split('T')
-                date = date[0]
-                date = date.split('-')
-                day = date[2]
-                month = date[1]
-                year = date[0]
-                date = datetime.datetime(int(year), int(month), int(day))
-                if date >= todate and date <= fromdate:
-                    query.append(entry)
-            if query != None:
-                visitor = list(map(something, query))
-                return {'result': query}
+            if visitor != None:
+                if non_check == 1:
+                    query = []
+                    for entry in visitor:
+                        if entry["Check_Out_Date"] == "":
+                            query.append(entry)
+                    if query != None:
+                        visitor = list(map(something, query))
+                        return {'result': visitor}
+                    else:
+                        return {"result": "Data Fetch Failed"}
+                else:
+                    visitor = list(map(something, visitor))
+                    return {'result': visitor}
             else:
                 return {"result": "Data Fetch Failed"}
 
-        if visitor != None:
-            visitor = list(map(something, visitor))
-            return {'result': visitor}
-        else:
-            return {"result":"Data Fetch Failed"}
+        elif val == 1 and val1 == 0:
+            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+todate} ,**dict1})
+            if visitor != None:
+                if non_check == 1:
+                    query = []
+                    for entry in visitor:
+                        if entry["Check_Out_Date"] == "":
+                            query.append(entry)
+                    if query != None:
+                        visitor = list(map(something, query))
+                        return {'result': visitor}
+                    else:
+                        return {"result": "Data Fetch Failed"}
+                else:
+                    visitor = list(map(something, visitor))
+                    return {'result': visitor}
+            else:
+                return {"result": "Data Fetch Failed"}
+
+        elif val == 0 and val1 == 1:
+            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+fromdate}, **dict1})
+            if visitor != None:
+                if non_check == 1:
+                    query = []
+                    for entry in visitor:
+                        if entry["Check_Out_Date"] == "":
+                            query.append(entry)
+                    if query != None:
+                        visitor = list(map(something, query))
+                        return {'result': visitor}
+                    else:
+                        return {"result": "Data Fetch Failed"}
+                else:
+                    visitor = list(map(something, visitor))
+                    return {'result': visitor}
+            else:
+                return {"result": "Data Fetch Failed"}
+
+        elif val == 1 and val1 == 1:            
+            visitor = VisitorsData.find(dict1)
+            if visitor != None:
+                todate = todate.split("-")
+                day = todate[2]
+                month = todate[1]
+                year = todate[0]
+                todate = datetime.datetime(int(year), int(month), int(day))
+
+                fromdate = fromdate.split("-")
+                day = int(fromdate[2])
+                month = fromdate[1]
+                year = fromdate[0]
+                fromdate = datetime.datetime(int(year), int(month), int(day))
+
+                query = []
+                for entry in visitor:
+                    date = entry['Check_In_Date']
+                    date = date.split('T')
+                    date = date[0]
+                    date = date.split('-')
+                    day = date[2]
+                    month = date[1]
+                    year = date[0]
+                    date = datetime.datetime(int(year), int(month), int(day))
+                    if date >= todate and date <= fromdate:
+                        query.append(entry)
+                if query != None:
+                    if non_check == 1:
+                        query1 = []
+                        for entry in query:
+                            if entry["Check_Out_Date"] == "":
+                                query1.append(entry)
+                        if query1 != None:
+                            visitor = list(map(something, query1))
+                            return {'result': visitor}
+                        else:
+                            return {"result": "Data Fetch Failed"}
+                    else:
+                        visitor = list(map(something, query))
+                        return {'result': visitor}
+            else:
+                return {"result": "Data Fetch Failed"}
 
 @app.route('/login', methods=["POST"])
 def login():
@@ -175,5 +232,85 @@ def login():
         elif(data['username'] == "admin" and data['password'] == "isadmin"):
             return {"token": "1234"}
         
-#app.run(host="localhost")
-waitress.serve(app, port=5000)
+@app.route('/regular', methods=["POST","GET"])
+def regular():
+    db = client['Reception_Name']
+    if request.method == "POST":
+        info = {'cnic': '' , 'timing' : []}
+        data = request.json
+        option = data['option']
+        cnic = data['cnic']
+        time = data['date']
+        if option == '1':
+            VisitorsData = db.WaterGuy
+        elif option == '2':
+            VisitorsData = db.FireGuy
+        visitor = VisitorsData.find_one({"cnic": cnic})
+        if visitor != None:
+            visitor['cnic'] = cnic
+            visitor['timing'].append(time)
+            VisitorsData.update_one({"cnic": cnic},{"$set": visitor})
+        else:
+            info['cnic'] = cnic
+            info['timing'].append(time)
+            VisitorsData.insert_one(info)
+
+        return {'result': "Checkout Time noted"}
+
+    if request.method == "GET":
+
+        def something(visitor):
+                visitor["_id"] = str(visitor["_id"])
+                return visitor
+
+        option = request.args.get('option')
+        cnic = request.args.get('cnic')
+        cnic = str(cnic)
+        if option == "1":
+            VisitorsData = db.waterGuy
+        elif option == "2":
+            VisitorsData = db.FireGuy
+        
+        visitor = VisitorsData.find_one({"cnic": cnic})
+        if visitor == None:
+            print("no data found")
+            return {"result": "No Data Found"}
+        else:
+            visitor = list(map(something, visitor))
+            print(visitor)
+            return {"result": visitor}
+
+
+@app.route('/details', methods=["POST", "GET"])
+def Info():
+    db = client['Reception_Name']
+    VisitorsData = db.Information
+    if request.method == "POST":
+        data = request.json
+        profession = data['profession'] 
+        name = data['name']
+        cnic = data['cnic']
+        # insert = VisitorsData.insert_one(data)
+        entry = VisitorsData.find_one({"profession": profession})
+        entry['name'] = name
+        entry['cnic'] = cnic
+        visitor = VisitorsData.update_one({'_id': entry['_id']}, {'$set': entry})
+        if visitor != None:
+            return {"result": "Successfully editted Database"}
+        else:
+            return {"result": "Editing Failed"}
+
+    if request.method == "GET":
+        def something(visitor):
+            visitor["_id"] = str(visitor["_id"])
+            return visitor
+
+        entry = VisitorsData.find()
+        entry = list(map(something, entry))
+        if entry != None:
+            return {"result": entry}
+        else:
+            return {"result": "Data Fetch Failed"}
+
+app.run(host="localhost")
+# waitress.serve(app, port=5000)
