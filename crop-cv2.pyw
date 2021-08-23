@@ -112,10 +112,10 @@ def search_screen():
         non_check = 0
         for k, v in filter.items():  
             if k == "From":
-                todate = v
+                fromdate = v
                 val = 1
             elif k == "To":
-                fromdate = v
+                todate = v
                 val1 = 1
             elif k == "Non_Checked_Out":
                 non_check = 1
@@ -142,7 +142,7 @@ def search_screen():
                 return {"result": "Data Fetch Failed"}
 
         elif val == 1 and val1 == 0:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+todate} ,**dict1})
+            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+fromdate} ,**dict1})
             if visitor != None:
                 if non_check == 1:
                     query = []
@@ -161,7 +161,7 @@ def search_screen():
                 return {"result": "Data Fetch Failed"}
 
         elif val == 0 and val1 == 1:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+fromdate}, **dict1})
+            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+todate}, **dict1})
             if visitor != None:
                 if non_check == 1:
                     query = []
@@ -204,7 +204,7 @@ def search_screen():
                     month = date[1]
                     year = date[0]
                     date = datetime.datetime(int(year), int(month), int(day))
-                    if date >= todate and date <= fromdate:
+                    if date >= fromdate and date <= todate:
                         query.append(entry)
                 if query != None:
                     if non_check == 1:
@@ -231,31 +231,36 @@ def login():
             return {"token": "1234"}
         elif(data['username'] == "admin" and data['password'] == "isadmin"):
             return {"token": "1234"}
-        
+         
 @app.route('/regular', methods=["POST","GET"])
 def regular():
     db = client['Reception_Name']
+    VisitorsData = db.Regulars
     if request.method == "POST":
-        info = {'cnic': '' , 'timing' : []}
+        info = {'profession':'', 'name': '', 'cnic': '' , 'timing' : []}
         data = request.json
-        option = data['option']
+        profession = data['profession']
+        name = data['name']
         cnic = data['cnic']
         time = data['date']
-        if option == '1':
-            VisitorsData = db.WaterGuy
-        elif option == '2':
-            VisitorsData = db.FireGuy
+        additional_info = data['additional_info']
         visitor = VisitorsData.find_one({"cnic": cnic})
         if visitor != None:
+            visitor['profession'] = profession
+            visitor['name'] = name
             visitor['cnic'] = cnic
+            visitor['additional_info'] = additional_info
             visitor['timing'].append(time)
             VisitorsData.update_one({"cnic": cnic},{"$set": visitor})
         else:
+            info["profession"] = profession
+            info["name"] = name
             info['cnic'] = cnic
+            info["additional_info"] = additional_info
             info['timing'].append(time)
             VisitorsData.insert_one(info)
 
-        return {'result': "Checkout Time noted"}
+        return {'result': "Data entry noted"}
 
     if request.method == "GET":
 
@@ -263,54 +268,109 @@ def regular():
                 visitor["_id"] = str(visitor["_id"])
                 return visitor
 
-        option = request.args.get('option')
-        cnic = request.args.get('cnic')
-        cnic = str(cnic)
-        if option == "1":
-            VisitorsData = db.waterGuy
-        elif option == "2":
-            VisitorsData = db.FireGuy
-        
-        visitor = VisitorsData.find_one({"cnic": cnic})
-        if visitor == None:
-            print("no data found")
-            return {"result": "No Data Found"}
-        else:
-            visitor = list(map(something, visitor))
-            print(visitor)
-            return {"result": visitor}
+        filter = request.args
+        dict1 = {}
+        val =  0
+        val1 = 0
+        for k, v in filter.items():  
+            if k == "From":
+                fromdate = v
+                val = 1
+            elif k == "To":
+                todate = v
+                val1 = 1
+            else:
+                dict1[k] = v
 
+        if val == 0 and val1 == 0:
+            visitor = VisitorsData.find(dict1)
+            if visitor != None:
+                visitor = list(map(something, visitor))
+                return {'result': visitor}
+            else:
+                return {"result": "Data Fetch Failed"}
 
-@app.route('/details', methods=["POST", "GET"])
-def Info():
-    db = client['Reception_Name']
-    VisitorsData = db.Information
-    if request.method == "POST":
-        data = request.json
-        profession = data['profession'] 
-        name = data['name']
-        cnic = data['cnic']
-        # insert = VisitorsData.insert_one(data)
-        entry = VisitorsData.find_one({"profession": profession})
-        entry['name'] = name
-        entry['cnic'] = cnic
-        visitor = VisitorsData.update_one({'_id': entry['_id']}, {'$set': entry})
-        if visitor != None:
-            return {"result": "Successfully editted Database"}
-        else:
-            return {"result": "Editing Failed"}
+        elif val == 1 and val1 == 0:
+            visitor = VisitorsData.find(dict1)
+            query = []
+            query1 = []
+            for entry in visitor:
+                for num in entry['timing']:
+                    num = num.split('T')
+                    if num[0] == fromdate:
+                        query.append(entry['profession'])
+                        query.append(entry['name'])
+                        query.append(entry['cnic'])
+                        query.append(num[0])
+                        query1.append(query)
+                        query = []
+            if query1 != None:
+                return {'result': query1}
+            else:
+                return {"result": "Data Fetch Failed"}
+                
+        elif val == 0 and val1 == 1:
+            visitor = VisitorsData.find(dict1)
+            query = []
+            query1 = []
+            for entry in visitor:
+                for num in entry['timing']:
+                    num = num.split('T')
+                    if num[0] == todate:
+                        query.append(entry['profession'])
+                        query.append(entry['name'])
+                        query.append(entry['cnic'])
+                        query.append(num[0])
+                        query1.append(query)
+                        query = []
+            if query1 != None:
+                return {'result': query1}
+            else:
+                return {"result": "Data Fetch Failed"}
 
-    if request.method == "GET":
-        def something(visitor):
-            visitor["_id"] = str(visitor["_id"])
-            return visitor
+        elif val == 1 and val1 == 1:
+            visitor = VisitorsData.find(dict1)
+            if visitor != None:
+                todate = todate.split("-")
+                day = todate[2]
+                month = todate[1]
+                year = todate[0]
+                todate = datetime.datetime(int(year), int(month), int(day))
 
-        entry = VisitorsData.find()
-        entry = list(map(something, entry))
-        if entry != None:
-            return {"result": entry}
-        else:
-            return {"result": "Data Fetch Failed"}
+                fromdate = fromdate.split("-")
+                day = int(fromdate[2])
+                month = fromdate[1]
+                year = fromdate[0]
+                fromdate = datetime.datetime(int(year), int(month), int(day))
+
+                print("this is from date: ",fromdate)
+                print("this is to date: ",todate)
+                query = []
+                query1 = []
+                for entry in visitor:
+                    for date in entry['timing']:
+                        date = date.split('T')
+                        date = date[0]
+                        date = date.split('-')
+                        day = date[2]
+                        month = date[1]
+                        year = date[0]
+                        date = datetime.datetime(int(year), int(month), int(day))
+                        print(date)
+                        if date >= fromdate and date <= todate:
+                            query.append(entry['profession'])
+                            query.append(entry['name'])
+                            query.append(entry['cnic'])
+                            query.append(date)
+                            query1.append(query)
+                            query = []
+                if query1 != None:
+                    return {'result': query1}
+                else:
+                    return {"result": "Data Fetch Failed"}
+            else:
+                return {"result": "Data Fetch Failed"}
+               
 
 app.run(host="localhost")
 # waitress.serve(app, port=5000)
