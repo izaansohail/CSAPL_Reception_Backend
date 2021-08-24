@@ -17,6 +17,10 @@ def process_image():
 
     if request.method == "POST":
         data = request.json
+        data['name'] = data['name'].lower()
+        data['organization_name'] = data['organization_name'].lower()
+        data['Contact_Person'] = data['Contact_Person'].lower()
+        data['Visit_Purpose'] = data['Visit_Purpose'].lower()
         insert = VisitorsData.insert_one(data)
         if insert != None:
             return {"result": "Data Sucessfully Inserted into Database"}
@@ -119,6 +123,8 @@ def search_screen():
                 val1 = 1
             elif k == "Non_Checked_Out":
                 non_check = 1
+            elif k == "name" or k == "organization_name":
+                dict1[k] = v.lower()
             else:
                 dict1[k] = v
 
@@ -239,11 +245,11 @@ def regular():
     if request.method == "POST":
         info = {'profession':'', 'name': '', 'cnic': '' , 'timing' : []}
         data = request.json
-        profession = data['profession']
-        name = data['name']
+        profession = data['profession'].lower()
+        name = data['name'].lower()
         cnic = data['cnic']
         time = data['date']
-        additional_info = data['additional_info']
+        additional_info = data['additional_info'].lower()
         visitor = VisitorsData.find_one({"cnic": cnic})
         if visitor != None:
             visitor['profession'] = profession
@@ -279,6 +285,8 @@ def regular():
             elif k == "To":
                 todate = v
                 val1 = 1
+            elif k == "name" or k == "profession" or k == "additional_info":
+                dict1[k] = v.lower()
             else:
                 dict1[k] = v
 
