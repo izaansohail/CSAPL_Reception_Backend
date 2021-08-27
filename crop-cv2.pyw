@@ -148,11 +148,18 @@ def search_screen():
                 return {"result": "Data Fetch Failed"}
 
         elif val == 1 and val1 == 0:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+fromdate} ,**dict1})
-            if visitor != None:
+            visitor = VisitorsData.find(dict1)
+            visitor1 = []
+            for entry in visitor:
+                date = entry["Check_In_Date"]
+                num = date.split('T')
+                num = num[0]
+                if num >= fromdate:
+                    visitor1.append(entry)
+            if visitor1 != None:
                 if non_check == 1:
                     query = []
-                    for entry in visitor:
+                    for entry in visitor1:
                         if entry["Check_Out_Date"] == "":
                             query.append(entry)
                     if query != None:
@@ -161,17 +168,24 @@ def search_screen():
                     else:
                         return {"result": "Data Fetch Failed"}
                 else:
-                    visitor = list(map(something, visitor))
+                    visitor = list(map(something, visitor1))
                     return {'result': visitor}
             else:
                 return {"result": "Data Fetch Failed"}
 
         elif val == 0 and val1 == 1:
-            visitor = VisitorsData.find({"Check_In_Date": {'$regex': '^'+todate}, **dict1})
-            if visitor != None:
+            visitor = VisitorsData.find(dict1)
+            visitor1 = []
+            for entry in visitor:
+                date = entry["Check_In_Date"]
+                num = date.split('T')
+                num = num[0]
+                if num <= todate:
+                    visitor1.append(entry)
+            if visitor1 != None:
                 if non_check == 1:
                     query = []
-                    for entry in visitor:
+                    for entry in visitor1:
                         if entry["Check_Out_Date"] == "":
                             query.append(entry)
                     if query != None:
@@ -180,7 +194,7 @@ def search_screen():
                     else:
                         return {"result": "Data Fetch Failed"}
                 else:
-                    visitor = list(map(something, visitor))
+                    visitor = list(map(something, visitor1))
                     return {'result': visitor}
             else:
                 return {"result": "Data Fetch Failed"}
