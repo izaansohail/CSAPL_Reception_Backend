@@ -8,7 +8,7 @@ import waitress
 app = Flask(__name__)
 CORS(app)
 app.config["DEBUG"] = False
-client = MongoClient("mongodb+srv://izaan:microsoft123@csapl.hsqoz.mongodb.net/test?authSource=admin&replicaSet=atlas-run4dp-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true", ssl_cert_reqs=ssl.CERT_NONE)
+client = MongoClient("mongodb+srv://superman:isadmin@csapl.3t7kz.mongodb.net/test?authSource=admin&replicaSet=atlas-hznxr7-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true", ssl_cert_reqs=ssl.CERT_NONE)
 
 @app.route('/data_handling', methods=['POST'])
 def process_image():
@@ -408,5 +408,5 @@ def regular():
                 return {"result": "Data Fetch Failed"}
                
 
-app.run(host="localhost")
-# waitress.serve(app, port=5000)
+# app.run(host="localhost")
+waitress.serve(app, port=5000)
