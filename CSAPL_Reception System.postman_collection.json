@@ -156,7 +156,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:5000/search_screen?From=2021-08-25&To=2021-08-27",
+					"raw": "http://localhost:5000/search_screen?name=Izaan sohail&organization_name=CSAPL",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -168,8 +168,7 @@
 					"query": [
 						{
 							"key": "name",
-							"value": "Visitor 6",
-							"disabled": true
+							"value": "Izaan sohail"
 						},
 						{
 							"key": "cnic",
@@ -178,57 +177,22 @@
 						},
 						{
 							"key": "organization_name",
-							"value": "CSAPL",
-							"disabled": true
+							"value": "CSAPL"
 						},
 						{
 							"key": "From",
-							"value": "2021-08-25"
+							"value": "2021-08-25",
+							"disabled": true
 						},
 						{
 							"key": "To",
-							"value": "2021-08-27"
+							"value": "2021-08-27",
+							"disabled": true
 						},
 						{
 							"key": "Non_Checked_Out",
 							"value": "true",
 							"disabled": true
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Report Generate",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://localhost:5000/regular?cnic=42101-8550537-3&option=1",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"regular"
-					],
-					"query": [
-						{
-							"key": "cnic",
-							"value": "42101-8550537-3"
-						},
-						{
-							"key": "option",
-							"value": "1"
 						}
 					]
 				}
@@ -278,7 +242,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:5000/regular?From=2021-08-24&To=2021-08-27",
+					"raw": "http://localhost:5000/regular?name=shaikh saHab",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -290,8 +254,7 @@
 					"query": [
 						{
 							"key": "name",
-							"value": "Visitor 6",
-							"disabled": true
+							"value": "shaikh saHab"
 						},
 						{
 							"key": "cnic",
@@ -300,15 +263,22 @@
 						},
 						{
 							"key": "From",
-							"value": "2021-08-24"
+							"value": "2021-08-24",
+							"disabled": true
 						},
 						{
 							"key": "To",
-							"value": "2021-08-27"
+							"value": "2021-08-27",
+							"disabled": true
 						},
 						{
 							"key": "profession",
 							"value": "Water Guy",
+							"disabled": true
+						},
+						{
+							"key": "additional_info",
+							"value": "Aquafina",
 							"disabled": true
 						}
 					]

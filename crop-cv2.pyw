@@ -243,7 +243,7 @@ def regular():
     db = client['Reception_Name']
     VisitorsData = db.Regulars
     if request.method == "POST":
-        info = {'profession':'', 'name': '', 'cnic': '' , 'timing' : []}
+        info = {'profession':'', 'name': '', 'cnic': '' , 'additional_info': '' ,'timing' : []}
         data = request.json
         profession = data['profession'].lower()
         name = data['name'].lower()
@@ -300,39 +300,49 @@ def regular():
 
         elif val == 1 and val1 == 0:
             visitor = VisitorsData.find(dict1)
-            query = []
             query1 = []
+            query = {'profession':'', 'name': '', 'cnic': '' , 'additional_info': '' ,'timing' : []}
             for entry in visitor:
                 for num in entry['timing']:
+                    date = num
                     num = num.split('T')
-                    if num[0] == fromdate:
-                        query.append(entry['profession'])
-                        query.append(entry['name'])
-                        query.append(entry['cnic'])
-                        query.append(num[0])
+                    if num[0] >= fromdate:
+                        query['_id'] = entry['_id']
+                        query['profession'] = entry['profession']
+                        query['name'] = entry['name']
+                        query['cnic'] = entry['cnic']
+                        query['additional_info'] = entry['additional_info']
+                        query['timing'].append(date)
                         query1.append(query)
-                        query = []
+                        query = {'_id': '', 'profession': '',
+                                 'name': '', 'cnic': '', 'timing': []}
             if query1 != None:
-                return {'result': query1}
+                visitor = list(map(something, query1))
+                return {'result': visitor}
             else:
                 return {"result": "Data Fetch Failed"}
                 
         elif val == 0 and val1 == 1:
             visitor = VisitorsData.find(dict1)
-            query = []
+            query = {'_id': '', 'profession': '','name': '', 'cnic': '', 'timing': []}
             query1 = []
             for entry in visitor:
                 for num in entry['timing']:
+                    date = num
                     num = num.split('T')
-                    if num[0] == todate:
-                        query.append(entry['profession'])
-                        query.append(entry['name'])
-                        query.append(entry['cnic'])
-                        query.append(num[0])
+                    if num[0] <= todate:
+                        query['_id'] = entry['_id']
+                        query['profession'] = entry['profession']
+                        query['name'] = entry['name']
+                        query['cnic'] = entry['cnic']
+                        query['additional_info'] = entry['additional_info']
+                        query['timing'].append(date)
                         query1.append(query)
-                        query = []
+                        query = {'_id': '', 'profession': '',
+                                 'name': '', 'cnic': '', 'timing': []}
             if query1 != None:
-                return {'result': query1}
+                visitor = list(map(something, query1))
+                return {'result': visitor}
             else:
                 return {"result": "Data Fetch Failed"}
 
@@ -353,10 +363,11 @@ def regular():
 
                 print("this is from date: ",fromdate)
                 print("this is to date: ",todate)
-                query = []
+                query = {'_id': '', 'profession': '','name': '', 'cnic': '', 'timing': []}
                 query1 = []
                 for entry in visitor:
                     for date in entry['timing']:
+                        num = date
                         date = date.split('T')
                         date = date[0]
                         date = date.split('-')
@@ -364,16 +375,19 @@ def regular():
                         month = date[1]
                         year = date[0]
                         date = datetime.datetime(int(year), int(month), int(day))
-                        print(date)
                         if date >= fromdate and date <= todate:
-                            query.append(entry['profession'])
-                            query.append(entry['name'])
-                            query.append(entry['cnic'])
-                            query.append(date)
+                            query['_id'] = entry['_id']
+                            query['profession'] = entry['profession']
+                            query['name'] = entry['name']
+                            query['cnic'] = entry['cnic']
+                            query['additional_info'] = entry['additional_info']
+                            query['timing'].append(num)
                             query1.append(query)
-                            query = []
+                            query = {'_id': '', 'profession': '',
+                                     'name': '', 'cnic': '', 'timing': []}
                 if query1 != None:
-                    return {'result': query1}
+                    visitor = list(map(something, query1))
+                    return {'result': visitor}
                 else:
                     return {"result": "Data Fetch Failed"}
             else:
